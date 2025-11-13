@@ -22,7 +22,7 @@ class ClaudeModels:
     ISSUE_GENERATION = SONNET_3_5
     QA_ANALYSIS = SONNET_3_5
     ISSUE_RESOLUTION = SONNET_3_5
-    WORKFLOW = SONNET_4_5
+    WORKFLOW = SONNET_3_5
     
     # Model parameters
     DEFAULT_MAX_TOKENS = 2000
