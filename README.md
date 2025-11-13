@@ -130,8 +130,6 @@ Contributions welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 For template maintenance, see [.agents/MAINTENANCE.md](.agents/MAINTENANCE.md).
 
 
-
-
 ## 📝 License
 
 MIT License - use freely in your projects. See [LICENSE](LICENSE) for details.
