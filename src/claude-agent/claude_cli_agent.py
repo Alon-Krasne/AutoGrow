@@ -206,11 +206,26 @@ class ClaudeAgent:
                     ) and result.stdout.strip()  # Has actual output
                     
                     if not is_warning_only:
-                        raise RuntimeError(f"Claude CLI error: {result.stderr}")
+                        # Provide more context in error message
+                        error_msg = f"Claude CLI error (exit code {result.returncode})"
+                        if result.stderr:
+                            error_msg += f": {result.stderr}"
+                        else:
+                            error_msg += ": No error message provided"
+                        if result.stdout:
+                            error_msg += f"\nStdout: {result.stdout[:200]}"
+                        raise RuntimeError(error_msg)
                     else:
                         # Log warning but continue
                         if self.verbose and result.stderr:
                             print(f"⚠️  Warning from Claude CLI: {result.stderr.strip()}", flush=True)
+                
+                # Check if we have any output
+                if not result.stdout or not result.stdout.strip():
+                    error_msg = "Claude CLI returned no output"
+                    if result.stderr:
+                        error_msg += f"\nStderr: {result.stderr}"
+                    raise RuntimeError(error_msg)
                 
                 if self.output_format == "json":
                     return json.loads(result.stdout)

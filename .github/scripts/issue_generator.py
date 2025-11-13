@@ -13,13 +13,18 @@ from github import Github, Auth
 # Add src directory to path to import claude_cli_agent
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / 'src' / 'claude-agent'))
 
-# Import Claude CLI Agent
+# Import Claude CLI Agent or fallback to Anthropic SDK
 try:
     from claude_cli_agent import ClaudeAgent
     USE_CLAUDE_CLI = True
 except ImportError:
-    print("⚠️  claude_cli_agent not available")
-    sys.exit(1)
+    print("⚠️  claude_cli_agent not available, using Anthropic SDK")
+    USE_CLAUDE_CLI = False
+    try:
+        from anthropic import Anthropic
+    except ImportError:
+        print("❌ Neither claude_cli_agent nor anthropic SDK available")
+        sys.exit(1)
 
 # Configuration
 MIN_ISSUES = int(os.getenv('MIN_OPEN_ISSUES', '3'))
@@ -105,29 +110,46 @@ Keep descriptions brief and output ONLY the JSON, nothing else."""
 
     print(f"📝 Prompt length: {len(prompt)} chars")
     
-    # Configure Claude CLI Agent
+    # Call Claude AI (CLI or API)
     try:
-        agent = ClaudeAgent(
-            output_format="text",
-            verbose=False
-        )
-        
-        print("🤖 Calling Claude AI...")
-        result = agent.query(
-            prompt,
-            system_prompt="You are a helpful GitHub issue generator. Always respond with valid JSON only."
-        )
-        
-        # Extract response
-        if isinstance(result, dict) and "result" in result:
-            response_text = result["result"]
+        if USE_CLAUDE_CLI:
+            # Try Claude CLI first
+            print("🤖 Using Claude CLI...")
+            agent = ClaudeAgent(
+                output_format="text",
+                verbose=True
+            )
+            
+            result = agent.query(
+                prompt,
+                system_prompt="You are a helpful GitHub issue generator. Always respond with valid JSON only."
+            )
+            
+            # Extract response
+            if isinstance(result, dict) and "result" in result:
+                response_text = result["result"]
+            else:
+                response_text = str(result)
         else:
-            response_text = str(result)
+            # Fallback to Anthropic SDK
+            print("🤖 Using Anthropic API...")
+            client = Anthropic(api_key=ANTHROPIC_API_KEY)
+            
+            message = client.messages.create(
+                model="claude-3-5-sonnet-20241022",
+                max_tokens=2000,
+                system="You are a helpful GitHub issue generator. Always respond with valid JSON only.",
+                messages=[
+                    {"role": "user", "content": prompt}
+                ]
+            )
+            
+            response_text = message.content[0].text
         
         print(f"✅ Received response ({len(response_text)} chars)")
         
     except Exception as e:
-        print(f"❌ Claude CLI error: {e}")
+        print(f"❌ Error calling Claude: {e}")
         import traceback
         traceback.print_exc()
         sys.exit(1)

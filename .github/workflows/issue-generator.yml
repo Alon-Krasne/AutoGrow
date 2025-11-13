@@ -39,10 +39,10 @@ jobs:
           node-version: '20'
       
       - name: Install Claude Code CLI
-        run: npm install -g @anthropic-ai/claude-code
+        run: npm install -g @anthropic-ai/claude-code || echo "Claude CLI installation failed, will use API fallback"
       
       - name: Install dependencies
-        run: pip install claude-agent-sdk PyGithub
+        run: pip install anthropic PyGithub GitPython
       
       - name: Run generator
         env:
