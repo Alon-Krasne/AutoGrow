@@ -389,8 +389,8 @@ I'm working on this issue now.
             readme = "No README found"
             print("   ⚠️  No README found")
 
-        # Build prompt
-        prompt = f"""You are an expert software engineer. Fix this GitHub issue by modifying the necessary files.
+        # Build prompt for Claude CLI
+        cli_prompt = f"""You are an expert software engineer. Fix this GitHub issue by modifying the necessary files.
 
 Repository: {self.repo.full_name}
 Issue #{issue.number}: {issue.title}
@@ -412,49 +412,117 @@ Instructions:
 
 You have access to Read and Write tools to modify files in the current directory."""
 
-        print(f"   📝 Prompt prepared ({len(prompt)} chars)")
+        print(f"   📝 Prompt prepared ({len(cli_prompt)} chars)")
         print(f"   🎯 Issue type: {', '.join(issue_labels)}")
 
-        # Initialize Claude CLI Agent
-        print("\n   🤖 Initializing Claude CLI Agent...")
-        print("   Tools enabled: Read, Write, Bash")
-        print("   Permission mode: acceptEdits")
+        # Try Claude CLI first if available
+        if USE_CLAUDE_CLI:
+            print("\n   🤖 Attempting to use Claude CLI Agent...")
+            print("   Tools enabled: Read, Write, Bash")
+            print("   Permission mode: acceptEdits")
+
+            try:
+                # Try to initialize with require_cli=False to check availability
+                agent = ClaudeAgent(
+                    output_format="text",
+                    verbose=True,
+                    allowed_tools=["Read", "Write", "Bash"],
+                    permission_mode="acceptEdits",
+                    require_cli=False,
+                )
+
+                if agent.cli_available:
+                    print("\n   📤 Sending query to Claude CLI...")
+                    print("   " + "="*76)
+                    result = agent.query(cli_prompt, stream_output=True)
+                    print("   " + "="*76)
+
+                    # Extract the response
+                    if isinstance(result, dict) and "result" in result:
+                        summary = result["result"]
+                    else:
+                        summary = str(result)
+
+                    print(f"\n   ✅ Claude CLI completed work successfully")
+                    print(f"   📊 Response length: {len(summary)} chars")
+                    
+                    # Print the full output
+                    print("\n   📄 CLAUDE OUTPUT:")
+                    print("   " + "-"*76)
+                    for line in summary.split('\n'):
+                        print(f"   {line}")
+                    print("   " + "-"*76)
+
+                    return summary
+                else:
+                    print("   ⚠️  Claude CLI not available, falling back to Anthropic SDK")
+
+            except Exception as e:
+                print(f"\n   ⚠️  Claude CLI error: {e}")
+                print("   ℹ️  Falling back to Anthropic SDK")
+
+        # Fallback to Anthropic SDK
+        print("\n   🤖 Using Anthropic SDK (API-based approach)")
+        
+        if not self.anthropic_api_key:
+            print("   ❌ No Anthropic API key provided")
+            return None
 
         try:
-            agent = ClaudeAgent(
-                output_format="text",
-                verbose=True,
-                allowed_tools=["Read", "Write", "Bash"],
-                permission_mode="acceptEdits",
+            client = Anthropic(api_key=self.anthropic_api_key)
+            
+            # Build a simpler prompt for API (no tool use)
+            api_prompt = f"""You are an expert software engineer. Analyze this GitHub issue and provide a detailed solution.
+
+Repository: {self.repo.full_name}
+Issue #{issue.number}: {issue.title}
+
+Description:
+{issue_body}
+
+Labels: {', '.join(issue_labels)}
+
+Context from README:
+{readme}
+
+Please provide:
+1. Analysis of the issue
+2. Detailed solution approach
+3. Specific code changes needed (with file paths and code snippets)
+4. Testing recommendations
+
+Format your response clearly with sections."""
+
+            print("\n   📤 Sending query to Claude API...")
+            
+            response = client.messages.create(
+                model="claude-3-5-sonnet-20241022",
+                max_tokens=4096,
+                messages=[{"role": "user", "content": api_prompt}]
             )
-
-            print("\n   📤 Sending query to Claude...")
-            print("   " + "="*76)
-            result = agent.query(prompt, stream_output=True)
-            print("   " + "="*76)
-
-            # Extract the response
-            if isinstance(result, dict) and "result" in result:
-                summary = result["result"]
-            else:
-                summary = str(result)
-
-            print(f"\n   ✅ Claude completed work successfully")
+            
+            summary = response.content[0].text
+            
+            print(f"\n   ✅ Claude API completed successfully")
             print(f"   📊 Response length: {len(summary)} chars")
             
-            # Print the full output
+            # Print the output
             print("\n   📄 CLAUDE OUTPUT:")
             print("   " + "-"*76)
-            for line in summary.split('\n'):
+            for line in summary.split('\n')[:50]:  # Limit output
                 print(f"   {line}")
+            if len(summary.split('\n')) > 50:
+                print(f"   ... ({len(summary.split('\n')) - 50} more lines)")
             print("   " + "-"*76)
+            
+            print("\n   ⚠️  Note: API mode provides guidance only")
+            print("   ℹ️  Manual code changes may be needed based on the suggestions")
 
             return summary
 
         except Exception as e:
-            print(f"\n   ❌ Claude Agent error: {e}")
+            print(f"\n   ❌ Anthropic SDK error: {e}")
             import traceback
-
             traceback.print_exc()
             return None
 

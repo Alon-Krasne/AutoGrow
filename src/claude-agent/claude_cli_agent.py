@@ -24,6 +24,7 @@ class ClaudeAgent:
         allowed_tools: Optional[List[str]] = None,
         disallowed_tools: Optional[List[str]] = None,
         permission_mode: Optional[str] = None,
+        require_cli: bool = True,
     ):
         """
         Initialize the Claude CLI Agent.
@@ -34,6 +35,7 @@ class ClaudeAgent:
             allowed_tools: List of allowed tools
             disallowed_tools: List of disallowed tools
             permission_mode: Permission mode (acceptEdits, etc.)
+            require_cli: If True, raise error if CLI is not available. If False, just set availability flag.
         """
         self.output_format = output_format
         self.verbose = verbose
@@ -42,7 +44,8 @@ class ClaudeAgent:
         self.permission_mode = permission_mode
 
         # Check if claude CLI is installed
-        if not self._is_claude_installed():
+        self.cli_available = self._is_claude_installed()
+        if require_cli and not self.cli_available:
             raise RuntimeError(
                 "Claude Code CLI is not installed. Install it from:\n"
                 "  https://code.claude.com/"
@@ -60,7 +63,7 @@ class ClaudeAgent:
         self, prompt: str, additional_args: Optional[List[str]] = None
     ) -> List[str]:
         """
-        Build the claude CLI command.
+        Build the claude CLI command for headless mode.
 
         Args:
             prompt: The prompt to send
@@ -69,6 +72,7 @@ class ClaudeAgent:
         Returns:
             List of command arguments
         """
+        # Use -p (--print) for headless mode
         cmd = ["claude", "-p", prompt]
 
         # Add output format
@@ -87,7 +91,7 @@ class ClaudeAgent:
         if self.disallowed_tools:
             cmd.extend(["--disallowedTools", ",".join(self.disallowed_tools)])
 
-        # Add permission mode
+        # Add permission mode (acceptEdits for automated workflows)
         if self.permission_mode:
             cmd.extend(["--permission-mode", self.permission_mode])
 
