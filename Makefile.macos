@@ -1,0 +1,169 @@
+# Makefile for macOS
+# AI Project Template - Test and CI Setup
+
+.PHONY: help install install-claude install-gemini install-test-deps test test-unit test-integration test-all clean
+
+# Default target
+help:
+	@echo "AI Project Template - macOS Makefile"
+	@echo ""
+	@echo "Available targets:"
+	@echo "  install              - Install all dependencies"
+	@echo "  install-claude       - Install Claude Code CLI"
+	@echo "  install-gemini       - Install Gemini CLI"
+	@echo "  install-test-deps    - Install test dependencies"
+	@echo "  test                 - Run unit tests only"
+	@echo "  test-unit            - Run unit tests"
+	@echo "  test-integration     - Run integration tests (requires API keys)"
+	@echo "  test-all             - Run all tests"
+	@echo "  test-coverage        - Run tests with coverage report"
+	@echo "  lint                 - Run code linters"
+	@echo "  format               - Format code with black"
+	@echo "  clean                - Clean temporary files"
+	@echo "  ci-flow              - Complete CI setup and test (for CI/CD)"
+	@echo "  ci-integration-flow  - Complete CI integration test (for CI/CD)"
+	@echo ""
+	@echo "Environment variables:"
+	@echo "  GEMINI_API_KEY       - Required for Gemini integration tests"
+	@echo "  ANTHROPIC_API_KEY    - Required for Claude integration tests (if using API)"
+	@echo ""
+
+# Install all dependencies
+install: install-claude install-gemini install-test-deps
+	@echo "✅ All dependencies installed"
+
+# Install Claude Code CLI via Homebrew
+install-claude:
+	@echo "📦 Installing Claude Code CLI..."
+	@if command -v claude >/dev/null 2>&1; then \
+		echo "✅ Claude CLI already installed: $$(claude --version 2>&1 | head -1)"; \
+	else \
+		if command -v brew >/dev/null 2>&1; then \
+			brew install --cask claude-code; \
+			echo "✅ Claude CLI installed successfully"; \
+		else \
+			echo "❌ Homebrew not found. Install from: https://brew.sh/"; \
+			echo "   Then install Claude from: https://code.claude.com/"; \
+			exit 1; \
+		fi \
+	fi
+
+# Install Gemini CLI via npm
+install-gemini:
+	@echo "📦 Installing Gemini CLI..."
+	@if command -v gemini >/dev/null 2>&1; then \
+		echo "✅ Gemini CLI already installed: $$(gemini --version 2>&1 | head -1)"; \
+	else \
+		if command -v npm >/dev/null 2>&1; then \
+			npm install -g @google/generative-ai-cli; \
+			echo "✅ Gemini CLI installed successfully"; \
+		else \
+			echo "❌ npm not found. Install Node.js from: https://nodejs.org/"; \
+			exit 1; \
+		fi \
+	fi
+
+# Install Python test dependencies
+install-test-deps:
+	@echo "📦 Installing Python test dependencies..."
+	@if command -v python3 >/dev/null 2>&1; then \
+		python3 -m pip install --upgrade pip; \
+		python3 -m pip install -r tests/requirements.txt; \
+		echo "✅ Test dependencies installed"; \
+	else \
+		echo "❌ Python 3 not found. Install from: https://www.python.org/"; \
+		exit 1; \
+	fi
+
+# Run unit tests only (no API calls)
+test: test-unit
+
+test-unit:
+	@echo "🧪 Running unit tests..."
+	@cd tests && python3 -m pytest unit/ -v -m "not integration" --tb=short
+
+# Run integration tests (requires API keys)
+test-integration:
+	@echo "🧪 Running integration tests..."
+	@if [ -z "$$GEMINI_API_KEY" ]; then \
+		echo "⚠️  GEMINI_API_KEY not set - Gemini integration tests will be skipped"; \
+	fi
+	@cd tests && python3 -m pytest integration/ -v -m "integration" --tb=short
+
+# Run all tests
+test-all:
+	@echo "🧪 Running all tests..."
+	@cd tests && python3 -m pytest -v --tb=short
+
+# Run tests with coverage
+test-coverage:
+	@echo "📊 Running tests with coverage..."
+	@cd tests && python3 -m pytest \
+		--cov=../src/gemini-agent \
+		--cov=../src/claude-agent \
+		--cov-report=html \
+		--cov-report=term \
+		-v
+
+# Run linters
+lint:
+	@echo "🔍 Running linters..."
+	@python3 -m pylint src/gemini-agent/gemini_agent.py || true
+	@python3 -m pylint src/claude-agent/claude_cli_agent.py || true
+	@python3 -m flake8 src/ tests/ || true
+	@echo "✅ Linting complete"
+
+# Format code
+format:
+	@echo "✨ Formatting code..."
+	@python3 -m black src/ tests/
+	@echo "✅ Code formatted"
+
+# Clean temporary files
+clean:
+	@echo "🧹 Cleaning temporary files..."
+	@find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+	@find . -type d -name "*.egg-info" -exec rm -rf {} + 2>/dev/null || true
+	@find . -type d -name ".pytest_cache" -exec rm -rf {} + 2>/dev/null || true
+	@find . -type d -name ".coverage" -exec rm -rf {} + 2>/dev/null || true
+	@find . -type d -name "htmlcov" -exec rm -rf {} + 2>/dev/null || true
+	@find . -type f -name "*.pyc" -delete 2>/dev/null || true
+	@rm -rf src/*/output 2>/dev/null || true
+	@echo "✅ Cleaned"
+
+# Verify installation
+verify:
+	@echo "🔍 Verifying installation..."
+	@echo ""
+	@echo "Python:"
+	@python3 --version || echo "❌ Python 3 not found"
+	@echo ""
+	@echo "Claude CLI:"
+	@claude --version 2>&1 | head -1 || echo "❌ Claude CLI not found"
+	@echo ""
+	@echo "Gemini CLI:"
+	@gemini --version 2>&1 | head -1 || echo "❌ Gemini CLI not found"
+	@echo ""
+	@echo "pip packages:"
+	@python3 -m pip list | grep -E "pytest|anthropic|google" || echo "⚠️  Some packages may be missing"
+	@echo ""
+	@echo "Environment variables:"
+	@if [ -n "$$GEMINI_API_KEY" ]; then echo "✅ GEMINI_API_KEY is set"; else echo "⚠️  GEMINI_API_KEY not set"; fi
+	@if [ -n "$$ANTHROPIC_API_KEY" ]; then echo "✅ ANTHROPIC_API_KEY is set"; else echo "⚠️  ANTHROPIC_API_KEY not set"; fi
+
+# Quick test (fast unit tests only)
+quick-test:
+	@echo "⚡ Running quick tests..."
+	@cd tests && python3 -m pytest unit/ -v -m "not slow and not integration" --tb=line
+
+# CI target (for GitHub Actions)
+ci: install-test-deps test-unit
+	@echo "✅ CI tests passed"
+
+# CI flow - complete CI setup and test
+ci-flow: install-test-deps install-gemini install-claude verify test-unit
+	@echo "✅ CI flow completed successfully"
+
+# CI integration flow - setup and run integration tests
+ci-integration-flow: install-test-deps install-gemini install-claude verify test-integration
+	@echo "✅ CI integration flow completed successfully"

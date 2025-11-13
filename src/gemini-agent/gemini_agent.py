@@ -1,0 +1,324 @@
+#!/usr/bin/env python3
+"""
+Gemini Agent - Python wrapper for gemini-cli headless mode
+Provides a Python interface to interact with Gemini CLI in agent mode
+"""
+
+import json
+import os
+import subprocess
+from typing import Dict, List, Optional, Any
+from pathlib import Path
+
+
+class GeminiAgent:
+    """
+    Python wrapper for Gemini CLI in headless mode.
+    Enables programmatic access to Gemini's capabilities.
+    """
+    
+    def __init__(
+        self,
+        api_key: Optional[str] = None,
+        model: str = "gemini-2.5-pro",
+        output_format: str = "json",
+        debug: bool = False
+    ):
+        """
+        Initialize the Gemini Agent.
+        
+        Args:
+            api_key: Gemini API key (defaults to GEMINI_API_KEY env var)
+            model: Gemini model to use
+            output_format: Output format (json or text)
+            debug: Enable debug mode
+        """
+        self.api_key = api_key or os.getenv("GEMINI_API_KEY")
+        if not self.api_key:
+            raise ValueError("GEMINI_API_KEY not set. Please set it in .env or pass it to the constructor.")
+        
+        self.model = model
+        self.output_format = output_format
+        self.debug = debug
+        
+        # Check if gemini-cli is installed
+        if not self._is_gemini_installed():
+            raise RuntimeError(
+                "gemini-cli is not installed. Install it with:\n"
+                "  npm install -g @google/gemini-cli\n"
+                "  or\n"
+                "  brew install gemini-cli"
+            )
+    
+    def _is_gemini_installed(self) -> bool:
+        """Check if gemini-cli is installed."""
+        try:
+            subprocess.run(
+                ["gemini", "--version"],
+                capture_output=True,
+                check=True
+            )
+            return True
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            return False
+    
+    def query(
+        self,
+        prompt: str,
+        include_dirs: Optional[List[str]] = None,
+        yolo: bool = False,
+        model: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """
+        Send a query to Gemini in headless mode.
+        
+        Args:
+            prompt: The prompt to send
+            include_dirs: Additional directories to include in context
+            yolo: Auto-approve all actions
+            model: Override default model
+            
+        Returns:
+            Dict containing response and metadata
+        """
+        cmd = [
+            "gemini",
+            "-p", prompt,
+            "--output-format", self.output_format,
+            "-m", model or self.model
+        ]
+        
+        if include_dirs:
+            cmd.extend(["--include-directories", ",".join(include_dirs)])
+        
+        if yolo:
+            cmd.append("--yolo")
+        
+        if self.debug:
+            cmd.append("--debug")
+        
+        env = os.environ.copy()
+        env["GEMINI_API_KEY"] = self.api_key
+        
+        try:
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                check=True,
+                env=env
+            )
+            
+            if self.output_format == "json":
+                return json.loads(result.stdout)
+            else:
+                return {"response": result.stdout}
+                
+        except subprocess.CalledProcessError as e:
+            raise RuntimeError(f"Gemini CLI error: {e.stderr}")
+        except json.JSONDecodeError as e:
+            raise RuntimeError(f"Failed to parse JSON response: {e}")
+    
+    def query_with_file(
+        self,
+        prompt: str,
+        file_path: str,
+        model: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """
+        Send a query with file content as input.
+        
+        Args:
+            prompt: The prompt to send
+            file_path: Path to file to include
+            model: Override default model
+            
+        Returns:
+            Dict containing response and metadata
+        """
+        if not os.path.exists(file_path):
+            raise FileNotFoundError(f"File not found: {file_path}")
+        
+        with open(file_path, 'r') as f:
+            file_content = f.read()
+        
+        cmd = [
+            "gemini",
+            "-p", prompt,
+            "--output-format", self.output_format,
+            "-m", model or self.model
+        ]
+        
+        if self.debug:
+            cmd.append("--debug")
+        
+        env = os.environ.copy()
+        env["GEMINI_API_KEY"] = self.api_key
+        
+        try:
+            result = subprocess.run(
+                cmd,
+                input=file_content,
+                capture_output=True,
+                text=True,
+                check=True,
+                env=env
+            )
+            
+            if self.output_format == "json":
+                return json.loads(result.stdout)
+            else:
+                return {"response": result.stdout}
+                
+        except subprocess.CalledProcessError as e:
+            raise RuntimeError(f"Gemini CLI error: {e.stderr}")
+        except json.JSONDecodeError as e:
+            raise RuntimeError(f"Failed to parse JSON response: {e}")
+    
+    def code_review(self, file_path: str) -> Dict[str, Any]:
+        """
+        Perform a code review on a file.
+        
+        Args:
+            file_path: Path to the file to review
+            
+        Returns:
+            Dict containing review results
+        """
+        prompt = """Review this code for:
+        1. Security vulnerabilities
+        2. Performance issues
+        3. Code quality and best practices
+        4. Potential bugs
+        5. Suggestions for improvement
+        
+        Provide a structured analysis with severity levels."""
+        
+        return self.query_with_file(prompt, file_path)
+    
+    def generate_docs(self, file_path: str) -> Dict[str, Any]:
+        """
+        Generate documentation for a file.
+        
+        Args:
+            file_path: Path to the file to document
+            
+        Returns:
+            Dict containing generated documentation
+        """
+        prompt = """Generate comprehensive documentation for this code including:
+        1. Overview and purpose
+        2. Function/class descriptions
+        3. Parameters and return values
+        4. Usage examples
+        5. Dependencies
+        
+        Format as Markdown."""
+        
+        return self.query_with_file(prompt, file_path, model="gemini-2.5-pro")
+    
+    def analyze_logs(self, log_file: str, focus: str = "errors") -> Dict[str, Any]:
+        """
+        Analyze log file for issues.
+        
+        Args:
+            log_file: Path to log file
+            focus: What to focus on (errors, warnings, patterns)
+            
+        Returns:
+            Dict containing analysis results
+        """
+        prompt = f"""Analyze these logs focusing on {focus}. Provide:
+        1. Root cause analysis
+        2. Severity assessment
+        3. Recommended fixes
+        4. Prevention strategies
+        5. Related patterns or issues"""
+        
+        return self.query_with_file(prompt, log_file)
+    
+    def batch_process(
+        self,
+        directory: str,
+        prompt: str,
+        file_pattern: str = "*.py"
+    ) -> List[Dict[str, Any]]:
+        """
+        Process multiple files in a directory.
+        
+        Args:
+            directory: Directory to process
+            prompt: Prompt to apply to each file
+            file_pattern: Glob pattern for files to process
+            
+        Returns:
+            List of results for each file
+        """
+        results = []
+        path = Path(directory)
+        
+        for file_path in path.rglob(file_pattern):
+            if file_path.is_file():
+                try:
+                    result = self.query_with_file(prompt, str(file_path))
+                    results.append({
+                        "file": str(file_path),
+                        "result": result,
+                        "success": True
+                    })
+                except Exception as e:
+                    results.append({
+                        "file": str(file_path),
+                        "error": str(e),
+                        "success": False
+                    })
+        
+        return results
+
+
+def main():
+    """Example usage of GeminiAgent."""
+    import sys
+    
+    # Load environment variables from .env if it exists
+    env_file = Path(__file__).parent / ".env"
+    if env_file.exists():
+        with open(env_file) as f:
+            for line in f:
+                if line.strip() and not line.startswith("#"):
+                    key, value = line.strip().split("=", 1)
+                    os.environ[key] = value
+    
+    try:
+        agent = GeminiAgent(debug=True)
+        
+        print("🤖 Gemini Agent - Python Interface")
+        print("=" * 50)
+        
+        # Example 1: Simple query
+        print("\n1. Simple Query:")
+        result = agent.query("What are the best practices for Python error handling?")
+        print(result.get("response", "No response"))
+        
+        # Example 2: Query with context
+        print("\n2. Query with Project Context:")
+        result = agent.query(
+            "Explain the project structure",
+            include_dirs=["../.."]
+        )
+        print(result.get("response", "No response"))
+        
+        # Example 3: Code review (if file provided)
+        if len(sys.argv) > 1:
+            file_path = sys.argv[1]
+            print(f"\n3. Code Review: {file_path}")
+            result = agent.code_review(file_path)
+            print(result.get("response", "No response"))
+        
+    except Exception as e:
+        print(f"❌ Error: {e}")
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()

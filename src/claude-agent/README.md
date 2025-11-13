@@ -1,9 +1,25 @@
 # Claude Agent Executor
 
-An autonomous Docker-based agent that uses Claude AI to automatically fix GitHub issues and create pull requests.
+An autonomous agent that uses Claude AI to automatically fix GitHub issues and create pull requests. Now with **Claude Code CLI headless mode** support!
+
+## 🎯 Two Modes Available
+
+### 1. Docker-Based Agent (Original)
+- Autonomous issue resolution using Claude API
+- GitHub CLI integration
+- Fully containerized
+- Automatic PR creation
+
+### 2. Claude CLI Headless Mode (NEW!)
+- Use Claude Code CLI in headless mode
+- Scriptable automation
+- Python wrapper available
+- Multi-turn conversations
+- Session management
 
 ## Features
 
+### Docker-Based Agent
 - 🤖 Autonomous issue resolution using Claude AI
 - 🔧 GitHub CLI integration for seamless repo interaction
 - 🐳 Fully containerized for consistent execution
@@ -13,15 +29,31 @@ An autonomous Docker-based agent that uses Claude AI to automatically fix GitHub
 - 📚 Multiple prompt templates (default, minimal, detailed)
 - 🔧 External prompt files for complete customization
 
+### Claude CLI Headless Mode (NEW!)
+- 🚀 **Headless automation** - Run Claude programmatically
+- 📝 **Code review** - Automated security and quality checks
+- 📚 **Documentation** - Generate comprehensive docs
+- 🔧 **Code fixing** - Fix issues with AI assistance
+- 🔄 **Multi-turn** - Maintain conversation context
+- 🐍 **Python wrapper** - Easy integration
+- 📊 **JSON output** - Parse results programmatically
+
 ## Prerequisites
 
+### For Docker-Based Agent
 - Docker and Docker Compose installed
 - GitHub Personal Access Token with repo permissions
 - Anthropic API Key
 
+### For Claude CLI Headless Mode
+- Claude Code CLI installed ([https://code.claude.com/](https://code.claude.com/))
+- Python 3.8+ (for Python wrapper)
+
 ## Quick Start
 
-### 1. Setup Environment
+### Option A: Docker-Based Agent
+
+#### 1. Setup Environment
 
 Copy the example environment file and configure your credentials:
 
@@ -35,13 +67,13 @@ Edit `.env` and add your credentials:
 - `REPO_URL`: The GitHub repository URL to work on
 - `ISSUE_NUMBER`: (Optional) Specific issue number, or leave empty for auto-selection
 
-### 2. Build the Docker Image
+#### 2. Build the Docker Image
 
 ```bash
 docker-compose build
 ```
 
-### 3. Run the Agent
+#### 3. Run the Agent
 
 ```bash
 docker-compose up
@@ -56,6 +88,55 @@ The agent will:
 6. Commit the changes
 7. Push the branch
 8. Create a pull request
+
+### Option B: Claude CLI Headless Mode (NEW!)
+
+#### 1. Install Claude Code CLI
+
+Visit [https://code.claude.com/](https://code.claude.com/) and follow installation instructions.
+
+#### 2. Verify Installation
+
+```bash
+claude --version
+```
+
+#### 3. Run Automation Scripts
+
+```bash
+cd scripts
+
+# Code review
+./code_review_cli.sh ../src/myfile.py
+
+# Generate documentation
+./generate_docs_cli.sh ../src
+
+# Fix code
+./fix_code_cli.sh ../src/app.py "Fix the authentication bug"
+
+# Agent runner
+./agent_runner_cli.sh code-review ../src
+```
+
+#### 4. Python Integration
+
+```python
+from claude_cli_agent import ClaudeAgent
+
+# Initialize
+agent = ClaudeAgent()
+
+# Code review
+result = agent.code_review("myfile.py")
+print(result["result"])
+
+# Generate docs
+result = agent.generate_docs("myfile.py")
+print(result["result"])
+```
+
+**📚 See [CLAUDE_CLI_QUICKSTART.md](CLAUDE_CLI_QUICKSTART.md) for complete guide**
 
 ## Manual Docker Run
 

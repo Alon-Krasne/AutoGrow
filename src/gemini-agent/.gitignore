@@ -1,0 +1,25 @@
+# Environment variables
+.env
+
+# API keys and secrets
+*.key
+*.pem
+
+# Logs
+*.log
+logs/
+
+# Output files
+output/
+reports/
+
+# Node modules (if using npm)
+node_modules/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# macOS
+.DS_Store

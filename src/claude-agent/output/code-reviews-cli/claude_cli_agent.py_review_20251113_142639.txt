@@ -1,0 +1,174 @@
+I'll perform a comprehensive code review of this Python wrapper for Claude CLI. Let me analyze it for security vulnerabilities, performance issues, code quality, potential bugs, and improvements.
+
+## Code Review Analysis
+
+### 🔴 CRITICAL - Security Vulnerabilities
+
+1. **Command Injection Risk (Line 102-122)** - CRITICAL
+   - **Issue**: User-supplied `prompt` is passed directly to subprocess without sanitization
+   - **Location**: `_build_command()` method, `cmd = ["claude", "-p", prompt]`
+   - **Risk**: If prompt contains shell metacharacters or newlines, could lead to command injection
+   - **Recommendation**: While using list-based args is safer than shell=True, validate/sanitize prompts and use proper escaping
+
+2. **Path Traversal Vulnerability (Lines 270, 284, 299)** - HIGH
+   - **Issue**: `file_path` parameters are not validated for path traversal attacks
+   - **Location**: `code_review()`, `generate_docs()`, `fix_code()` methods
+   - **Risk**: Attacker could read arbitrary files using paths like `../../etc/passwd`
+   - **Recommendation**: 
+     ```python
+     file_path = Path(file_path).resolve()
+     # Validate it's within expected directory
+     if not str(file_path).startswith(str(allowed_base_path)):
+         raise ValueError("Invalid file path")
+     ```
+
+3. **Uncontrolled Resource Consumption (Line 324)** - MEDIUM
+   - **Issue**: `batch_process()` reads entire files into memory without size limits
+   - **Location**: `with open(file_path, 'r') as f: content = f.read()`
+   - **Risk**: Large files could cause memory exhaustion or DoS
+   - **Recommendation**: Add file size checks before reading
+
+### 🟡 HIGH - Performance Issues
+
+1. **Inefficient Batch Processing (Lines 314-343)** - HIGH
+   - **Issue**: Sequential processing of files, no parallelization
+   - **Impact**: Slow for large directories
+   - **Recommendation**: Use `concurrent.futures.ThreadPoolExecutor` or `asyncio` for parallel processing
+
+2. **No Output Streaming (Lines 134-152)** - MEDIUM
+   - **Issue**: `capture_output=True` loads entire response into memory
+   - **Impact**: Large responses could cause memory issues
+   - **Recommendation**: Implement streaming for large outputs when using `stream-json` format
+
+3. **Repeated File I/O (Lines 274, 288, 303)** - LOW
+   - **Issue**: Files are read multiple times if different methods called on same file
+   - **Impact**: Unnecessary disk I/O
+   - **Recommendation**: Consider caching file content or accepting content as parameter
+
+### 🟠 MEDIUM - Code Quality & Best Practices
+
+1. **Poor Error Handling** - MEDIUM
+   - **Issue**: Generic `Exception` catch in `batch_process()` (line 336)
+   - **Location**: Line 336: `except Exception as e:`
+   - **Recommendation**: Catch specific exceptions (IOError, UnicodeDecodeError, etc.)
+
+2. **Missing Input Validation** - MEDIUM
+   - **Issue**: No validation for `output_format`, `permission_mode` parameters
+   - **Location**: `__init__()` method
+   - **Recommendation**: Add enum validation:
+     ```python
+     VALID_FORMATS = ["text", "json", "stream-json"]
+     if output_format not in VALID_FORMATS:
+         raise ValueError(f"Invalid format: {output_format}")
+     ```
+
+3. **No Timeout Configuration** - MEDIUM
+   - **Issue**: Subprocess calls lack timeout parameter
+   - **Location**: Lines 145, 169, 218
+   - **Risk**: Hanging processes if CLI becomes unresponsive
+   - **Recommendation**: Add timeout parameter to all `subprocess.run()` calls
+
+4. **Hardcoded Encoding** - LOW
+   - **Issue**: File operations don't specify encoding
+   - **Location**: Lines 274, 288, 303, 326
+   - **Recommendation**: Add `encoding='utf-8'` to all `open()` calls
+
+### 🔵 MEDIUM - Potential Bugs
+
+1. **JSON Parsing Error Handling** - MEDIUM
+   - **Issue**: JSON parsing errors lose original stdout data
+   - **Location**: Lines 151, 176, 227
+   - **Impact**: Debugging becomes difficult when JSON is malformed
+   - **Recommendation**: Include raw stdout in error message:
+     ```python
+     except json.JSONDecodeError as e:
+         raise RuntimeError(f"Failed to parse JSON: {e}\nRaw output: {result.stdout}")
+     ```
+
+2. **Missing stderr in Success Cases** - LOW
+   - **Issue**: stderr is only captured on errors, warnings might be lost
+   - **Location**: All subprocess calls
+   - **Recommendation**: Return stderr in successful responses for debugging
+
+3. **Inconsistent Command Building** - LOW
+   - **Issue**: `continue_conversation()` doesn't use `_build_command()` helper
+   - **Location**: Lines 200-207
+   - **Impact**: Inconsistent behavior, harder to maintain
+   - **Recommendation**: Refactor to use shared command building logic
+
+### ✅ Suggestions for Improvement
+
+1. **Add Type Hints Everywhere** - Code Quality
+   - Missing return type hints in several places
+   - Add `from __future__ import annotations` for forward references
+
+2. **Implement Context Manager** - Best Practice
+   ```python
+   def __enter__(self):
+       return self
+   
+   def __exit__(self, exc_type, exc_val, exc_tb):
+       # Cleanup resources if needed
+       pass
+   ```
+
+3. **Add Logging Instead of Print** - Best Practice
+   - Replace print statements with proper logging module
+   - Allow users to control log levels
+
+4. **Configuration File Support** - Feature
+   - Allow loading default settings from config file
+   - Support environment variables for configuration
+
+5. **Add Response Validation** - Robustness
+   - Validate JSON structure matches expected schema
+   - Add response type hints/dataclasses
+
+6. **Improve Documentation** - Maintainability
+   - Add examples in docstrings
+   - Document expected JSON response structure
+   - Add error cases to docstrings
+
+7. **Add Unit Tests** - Quality
+   - Mock subprocess calls for testing
+   - Test error conditions
+   - Test input validation
+
+### Priority Fix List
+
+**Immediate (Before Production):**
+1. Fix path traversal vulnerability (add path validation)
+2. Add timeout to subprocess calls
+3. Add file size limits in batch operations
+4. Validate output_format and other enum parameters
+
+**High Priority:**
+1. Improve error handling (specific exceptions)
+2. Add input sanitization for prompts
+3. Implement proper encoding handling
+4. Add logging framework
+
+**Medium Priority:**
+1. Add batch processing parallelization
+2. Implement context manager protocol
+3. Add comprehensive error messages with raw output
+4. Standardize command building
+
+**Low Priority:**
+1. Add configuration file support
+2. Implement response streaming
+3. Add response validation
+4. Write comprehensive tests
+
+### Security Score: 6/10
+- Critical path traversal issue
+- Lacks input validation
+- No resource limits
+
+### Code Quality Score: 7/10
+- Well-structured and readable
+- Good use of type hints
+- Needs better error handling
+
+### Overall Assessment
+The code provides a clean interface but has **critical security vulnerabilities** that must be addressed before production use. The architecture is sound, but needs hardening around input validation, resource management, and error handling.

@@ -94,11 +94,34 @@ The template is **technology-agnostic**. AI can generate projects using:
 
 Just specify your preferences in `PROJECT_BRIEF.md`.
 
+## 🤖 AI Agents
+
+This template includes ready-to-use AI agents for automation:
+
+### Claude Agent
+- **Location**: `src/claude-agent/`
+- **Purpose**: Complex code generation and issue resolution
+- **Features**: GitHub integration, automated PR creation, multi-role workflow
+
+### Gemini Agent (NEW!)
+- **Location**: `src/gemini-agent/`
+- **Purpose**: Headless automation, code review, documentation generation
+- **Features**: CLI-based, scriptable, batch processing, Python integration
+- **Quick Start**: See [src/gemini-agent/QUICKSTART.md](src/gemini-agent/QUICKSTART.md)
+
+**Use Cases:**
+- Automated code reviews
+- Documentation generation
+- Log analysis
+- Batch file processing
+- CI/CD integration
+
 ## 📚 Documentation
 
 - **[QUICKSTART.md](QUICKSTART.md)** - Quick start guide
 - **[PROJECT_BRIEF.md](PROJECT_BRIEF.md)** - Template to fill out
 - **[.agents/](.agents/)** - AI guidelines and maintenance docs
+- **[src/gemini-agent/](src/gemini-agent/)** - Gemini CLI agent setup and examples
 
 ## 🤝 Contributing
 
