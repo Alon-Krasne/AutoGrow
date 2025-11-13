@@ -54,13 +54,63 @@ print(f"✅ Connected to repository: {REPO_NAME}")
 git_repo = git.Repo('.')
 
 
-def validate_project_brief_if_exists():
+def should_skip_validation(issue_title, issue_body, issue_labels):
+    """
+    Determine if PROJECT_BRIEF.md validation should be skipped for this issue
+    
+    Args:
+        issue_title: The issue title
+        issue_body: The issue body/description
+        issue_labels: List of issue label names
+        
+    Returns:
+        bool: True if validation should be skipped
+    """
+    # Keywords that indicate the issue is about creating/fixing PROJECT_BRIEF.md itself
+    skip_keywords = [
+        'project_brief',
+        'project brief',
+        'template',
+        'example',
+        'documentation',
+        'readme',
+        'setup',
+        'initial',
+        'bootstrap'
+    ]
+    
+    # Check if issue is about PROJECT_BRIEF.md or templates
+    text_to_check = f"{issue_title} {issue_body}".lower()
+    if any(keyword in text_to_check for keyword in skip_keywords):
+        return True
+    
+    # Check labels
+    skip_labels = ['documentation', 'setup', 'template']
+    if any(label in skip_labels for label in issue_labels):
+        return True
+    
+    return False
+
+
+def validate_project_brief_if_exists(issue_title="", issue_body="", issue_labels=None):
     """
     Validate PROJECT_BRIEF.md if it exists in the repository
+    
+    Args:
+        issue_title: The issue title (for skip detection)
+        issue_body: The issue body (for skip detection)
+        issue_labels: List of issue labels (for skip detection)
 
     Returns:
         Tuple of (is_valid, validation_message)
     """
+    issue_labels = issue_labels or []
+    
+    # Check if we should skip validation for this issue
+    if should_skip_validation(issue_title, issue_body, issue_labels):
+        print("ℹ️  Skipping PROJECT_BRIEF.md validation (issue is about templates/documentation)")
+        return True, None
+    
     project_brief_path = Path('PROJECT_BRIEF.md')
 
     if not project_brief_path.exists():
@@ -153,9 +203,17 @@ I'm working on this issue now.
     selected_issue.add_to_labels('in-progress')
     issue_claimed = True  # Mark that we claimed it
     print("📝 Claimed issue")
+    
+    # Get issue details for validation check
+    issue_body = selected_issue.body or "No description provided"
+    issue_labels = [label.name for label in selected_issue.labels]
 
-    # Validate PROJECT_BRIEF.md before proceeding
-    is_valid, validation_msg = validate_project_brief_if_exists()
+    # Validate PROJECT_BRIEF.md before proceeding (may skip for certain issues)
+    is_valid, validation_msg = validate_project_brief_if_exists(
+        issue_title=selected_issue.title,
+        issue_body=issue_body,
+        issue_labels=issue_labels
+    )
     if not is_valid:
         print("❌ PROJECT_BRIEF.md validation failed - aborting to save API calls")
         selected_issue.create_comment(
@@ -175,9 +233,6 @@ I'm working on this issue now.
         readme = repo.get_readme().decoded_content.decode('utf-8')[:2000]
     except:
         readme = "No README found"
-    
-    issue_body = selected_issue.body or "No description provided"
-    issue_labels = [label.name for label in selected_issue.labels]
     
     # Build prompt for Claude
     prompt = f"""You are an expert software engineer. Fix this GitHub issue by modifying the necessary files.
