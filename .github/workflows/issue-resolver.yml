@@ -59,7 +59,7 @@ jobs:
       
       - name: Install Python dependencies
         run: |
-          pip install PyGithub GitPython anthropic anyio
+          pip install -r src/requirements.txt
           echo "✅ Python dependencies installed"
       
       - name: Configure Git

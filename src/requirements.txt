@@ -1,0 +1,16 @@
+# AI Project Template - Core Dependencies
+
+# GitHub API
+PyGithub>=2.1.1
+
+# Git operations
+GitPython>=3.1.40
+
+# Claude AI
+anthropic>=0.3.0
+
+# Async support
+anyio>=4.0.0
+
+# Retry logic for resilient API calls
+tenacity>=8.2.0

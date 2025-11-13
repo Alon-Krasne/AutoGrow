@@ -55,7 +55,7 @@ jobs:
       
       - name: Install Python dependencies
         run: |
-          pip install anthropic PyGithub GitPython
+          pip install -r src/requirements.txt
           echo "✅ Python dependencies installed"
       
       - name: Run generator

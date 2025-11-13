@@ -31,7 +31,7 @@ jobs:
       
       - name: Install dependencies
         run: |
-          pip install PyGithub GitPython anthropic anyio
+          pip install -r src/requirements.txt
       
       - name: Configure Git
         run: |
@@ -70,7 +70,7 @@ jobs:
       
       - name: Install dependencies
         run: |
-          pip install PyGithub anthropic
+          pip install -r src/requirements.txt
       
       - name: Validate Issue Generator (Dry Mode)
         env:
