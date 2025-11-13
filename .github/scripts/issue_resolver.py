@@ -7,12 +7,27 @@ Takes an open issue, analyzes it with Claude AI using Agent SDK, implements a fi
 import os
 import sys
 import time
-import anyio
 from datetime import datetime
 from pathlib import Path
 from github import Github, Auth
-from claude_agent_sdk import ClaudeSDKClient, ClaudeAgentOptions, AssistantMessage, TextBlock
 import git
+
+# Try to import Claude Agent SDK, fallback to anthropic
+try:
+    from claude_agent_sdk import ClaudeSDKClient, ClaudeAgentOptions, AssistantMessage, TextBlock
+    USE_AGENT_SDK = True
+except ImportError:
+    print("⚠️  claude_agent_sdk not available, using anthropic SDK")
+    from anthropic import Anthropic
+    USE_AGENT_SDK = False
+
+# Try to import anyio for async support
+try:
+    import anyio
+    HAS_ANYIO = True
+except ImportError:
+    print("⚠️  anyio not available, using synchronous execution")
+    HAS_ANYIO = False
 
 # Configuration
 GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
@@ -247,4 +262,9 @@ Pull Request: #{pr.number}
 
 
 # Run the async function
-anyio.run(resolve_issue)
+if HAS_ANYIO:
+    anyio.run(resolve_issue)
+else:
+    print("❌ Error: anyio is required for async execution")
+    print("Install with: pip install anyio")
+    sys.exit(1)

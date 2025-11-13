@@ -43,10 +43,15 @@ jobs:
           node-version: '20'
       
       - name: Install Claude Code CLI
-        run: npm install -g @anthropic-ai/claude-code
+        run: |
+          # Install Claude Code CLI if available
+          npm install -g @anthropic-ai/claude-code || echo "Claude CLI not available via npm"
       
       - name: Install dependencies
-        run: pip install claude-agent-sdk PyGithub GitPython
+        run: |
+          pip install PyGithub GitPython anthropic anyio
+          # Install claude-agent-sdk if available
+          pip install claude-agent-sdk || echo "claude-agent-sdk not available, will use anthropic SDK"
       
       - name: Configure Git
         run: |

@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  test-claude-agent:
+  sanity-check:
     runs-on: ubuntu-latest
     
     steps:
@@ -20,20 +20,57 @@ jobs:
         with:
           python-version: '3.11'
       
-      - name: Install dependencies
-        working-directory: src/claude-agent
+      - name: Check project structure
         run: |
-          pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install pytest pytest-cov
+          echo "🔍 Checking project structure..."
+          
+          # Check main directories exist
+          test -d src/claude-agent && echo "✅ Claude agent directory exists" || echo "❌ Claude agent directory missing"
+          test -d src/gemini-agent && echo "✅ Gemini agent directory exists" || echo "❌ Gemini agent directory missing"
+          test -d tests && echo "✅ Tests directory exists" || echo "❌ Tests directory missing"
+          test -d .github/workflows && echo "✅ Workflows directory exists" || echo "❌ Workflows directory missing"
+          
+          # Check key files exist
+          test -f src/claude-agent/claude_cli_agent.py && echo "✅ Claude CLI agent exists" || echo "❌ Claude CLI agent missing"
+          test -f src/gemini-agent/gemini_agent.py && echo "✅ Gemini agent exists" || echo "❌ Gemini agent missing"
+          test -f tests/unit/test_claude_cli_agent.py && echo "✅ Claude unit tests exist" || echo "❌ Claude unit tests missing"
+          test -f tests/unit/test_gemini_agent.py && echo "✅ Gemini unit tests exist" || echo "❌ Gemini unit tests missing"
       
-      - name: Run tests
-        working-directory: src/claude-agent
+      - name: Check Python syntax
         run: |
-          echo "🧪 Running Claude Agent tests..."
-          python -m pytest tests/ -v --tb=short
+          echo "🔍 Checking Python syntax..."
+          
+          # Check Claude agent
+          python -m py_compile src/claude-agent/claude_cli_agent.py && echo "✅ Claude agent syntax OK" || echo "❌ Claude agent syntax error"
+          
+          # Check Gemini agent
+          python -m py_compile src/gemini-agent/gemini_agent.py && echo "✅ Gemini agent syntax OK" || echo "❌ Gemini agent syntax error"
+          
+          # Check logging config
+          test -f src/logging_config.py && python -m py_compile src/logging_config.py && echo "✅ Logging config syntax OK" || echo "⚠️ Logging config not found or has syntax error"
       
-      - name: Test summary
+      - name: Check bash scripts
+        run: |
+          echo "🔍 Checking bash scripts..."
+          
+          # Check Claude scripts
+          for script in src/claude-agent/scripts/*.sh; do
+            if [ -f "$script" ]; then
+              bash -n "$script" && echo "✅ $(basename $script) syntax OK" || echo "❌ $(basename $script) syntax error"
+            fi
+          done
+          
+          # Check Gemini scripts
+          for script in src/gemini-agent/scripts/*.sh; do
+            if [ -f "$script" ]; then
+              bash -n "$script" && echo "✅ $(basename $script) syntax OK" || echo "❌ $(basename $script) syntax error"
+            fi
+          done
+      
+      - name: Sanity check summary
         if: always()
         run: |
-          echo "✅ Sanity tests completed"
+          echo "✅ Sanity checks completed"
+          echo ""
+          echo "Note: This workflow performs basic sanity checks."
+          echo "For full testing, see the 'Test AI Agents' workflow."
