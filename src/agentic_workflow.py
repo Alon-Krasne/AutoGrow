@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Claude Agent Workflow
-Autonomous GitHub issue resolution using Claude AI
+Claude Agentic Workflow
+LLM-based role workflow for GitHub issue resolution using Claude AI
 """
 
 import sys
@@ -19,8 +19,8 @@ from utils.logger import setup_logger
 from prompt_loader import PromptLoader
 
 
-class AgentWorkflow:
-    """Main workflow orchestrator for the Claude agent"""
+class AgenticWorkflow:
+    """Main workflow orchestrator for the Claude agentic system"""
     
     def __init__(self, config: Optional[AgentConfig] = None):
         # Load configuration
@@ -41,7 +41,7 @@ class AgentWorkflow:
         # Initialize prompt loader
         self.prompt_loader = PromptLoader()
         
-        self.logger.info("Agent workflow initialized")
+        self.logger.info("Agentic workflow initialized")
         self.logger.info(f"Mode: {self.config.agent_mode}")
         self.logger.info(f"Prompt template: {self.config.prompt_template}")
     
@@ -318,7 +318,7 @@ Closes #{issue['number']}
     def run(self):
         """Execute the complete workflow"""
         self.logger.info("=" * 60)
-        self.logger.info("Claude Agent Workflow Starting")
+        self.logger.info("Claude Agentic Workflow Starting")
         self.logger.info("=" * 60)
         
         try:
@@ -376,7 +376,7 @@ Closes #{issue['number']}
 
 def main():
     """Main entry point"""
-    workflow = AgentWorkflow()
+    workflow = AgenticWorkflow()
     exit_code = workflow.run()
     sys.exit(exit_code)
 

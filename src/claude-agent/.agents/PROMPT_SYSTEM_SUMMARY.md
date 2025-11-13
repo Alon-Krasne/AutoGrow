@@ -45,7 +45,7 @@ Created `prompts/` directory with three built-in templates:
 
 ### 4. Workflow Integration
 
-**File**: `src/agent_workflow.py`
+**File**: `src/agentic_workflow.py`
 
 **Changes**:
 - Initialize `PromptLoader` instance
@@ -147,7 +147,7 @@ PROMPT_TEMPLATE=detailed
 
 ```
 ┌─────────────────────────────────────────┐
-│         AgentWorkflow                   │
+│         AgenticWorkflow                 │
 │                                         │
 │  ┌───────────────────────────────────┐ │
 │  │      PromptLoader                 │ │
@@ -209,7 +209,7 @@ claude-agent/
 ├── src/
 │   ├── prompt_loader.py       # NEW - Prompt system
 │   ├── config.py              # UPDATED - Added prompt fields
-│   └── agent_workflow.py      # UPDATED - Uses templates
+│   └── agentic_workflow.py    # UPDATED - Uses templates
 │
 ├── CUSTOM_PROMPTS.md          # NEW - Complete guide
 ├── README.md                  # UPDATED - Added prompt section
@@ -228,7 +228,7 @@ claude-agent/
 
 ### Modified Files
 - `src/config.py`: +15 lines
-- `src/agent_workflow.py`: +30 lines (replaced hardcoded prompt)
+- `src/agentic_workflow.py`: +30 lines (replaced hardcoded prompt)
 - `Dockerfile`: +3 lines
 - `docker-compose.yml`: +1 line
 - `.env.example`: +6 lines

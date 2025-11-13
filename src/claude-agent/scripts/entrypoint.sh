@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "=== Claude Agent Executor Starting ==="
+echo "=== Claude Agentic Workflow Executor Starting ==="
 echo "Repository: ${REPO_URL}"
 echo "Issue Number: ${ISSUE_NUMBER:-'auto-select'}"
 echo "Mode: ${AGENT_MODE}"
@@ -28,16 +28,16 @@ echo "$GITHUB_TOKEN" | gh auth login --with-token
 # Verify authentication
 gh auth status
 
-# Execute the Python agent workflow
-echo "Executing Python agent workflow..."
-python3 /agent/src/agent_workflow.py
+# Execute the Python agentic workflow
+echo "Executing Python agentic workflow..."
+python3 /agent/src/agentic_workflow.py
 
 exit_code=$?
 
 if [ $exit_code -eq 0 ]; then
-    echo "=== Claude Agent Executor Completed Successfully ==="
+    echo "=== Claude Agentic Workflow Executor Completed Successfully ==="
 else
-    echo "=== Claude Agent Executor Failed with exit code $exit_code ==="
+    echo "=== Claude Agentic Workflow Executor Failed with exit code $exit_code ==="
 fi
 
 exit $exit_code

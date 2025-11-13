@@ -15,10 +15,10 @@
 │                   │                                          │
 │                   ▼                                          │
 │  ┌────────────────────────────────────────────────────────┐ │
-│  │         agent_workflow.py (Python)                     │ │
+│  │         agentic_workflow.py (Python)                   │ │
 │  │                                                         │ │
 │  │  ┌──────────────────────────────────────────────────┐ │ │
-│  │  │  AgentWorkflow Class                             │ │ │
+│  │  │  AgenticWorkflow Class                           │ │ │
 │  │  │  • Configuration management                      │ │ │
 │  │  │  • Logging setup                                 │ │ │
 │  │  │  • API client initialization                     │ │ │
@@ -125,7 +125,7 @@ START
          │
          ▼
 ┌─────────────────────────────────────────────────────────┐
-│                   AgentWorkflow                          │
+│                   AgenticWorkflow                        │
 │                                                          │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐ │
 │  │   GitHub     │  │   Claude     │  │     Git      │ │
@@ -255,7 +255,7 @@ START
 /agent/                        (Agent code)
     │
     └── src/
-        ├── agent_workflow.py
+        ├── agentic_workflow.py
         ├── config.py
         └── utils/
             └── logger.py
@@ -349,24 +349,24 @@ Time    Action                           Component
 00:00   Start container                  Docker
 00:01   Validate environment             entrypoint.sh
 00:02   Authenticate GitHub CLI          entrypoint.sh
-00:03   Initialize Python workflow       agent_workflow.py
+00:03   Initialize Python workflow       agentic_workflow.py
 00:04   Load configuration               config.py
 00:05   Setup logging                    logger.py
-00:06   Initialize API clients           agent_workflow.py
-00:07   Parse repository URL             agent_workflow.py
+00:06   Initialize API clients           agentic_workflow.py
+00:07   Parse repository URL             agentic_workflow.py
 00:10   Clone repository                 GitPython
 00:15   Fetch issue details              PyGithub
 00:16   Create fix branch                GitPython
-00:17   Analyze codebase                 agent_workflow.py
+00:17   Analyze codebase                 agentic_workflow.py
 00:20   Generate fix with Claude         Anthropic API
-00:35   Parse Claude response            agent_workflow.py
+00:35   Parse Claude response            agentic_workflow.py
 00:36   Apply code changes               Python file I/O
 00:37   Stage changes                    GitPython
 00:38   Commit changes                   GitPython
 00:40   Push branch                      GitPython
 00:45   Create pull request              PyGithub
 00:46   Log completion                   logger.py
-00:47   Exit successfully                agent_workflow.py
+00:47   Exit successfully                agentic_workflow.py
 ```
 
 ## Legend

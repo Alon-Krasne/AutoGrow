@@ -28,7 +28,7 @@ claude-agent/
 │
 ├── src/                       # Python source code
 │   ├── __init__.py
-│   ├── agent_workflow.py      # Main workflow orchestrator
+│   ├── agentic_workflow.py    # Main workflow orchestrator
 │   ├── config.py              # Configuration management
 │   └── utils/
 │       ├── __init__.py
@@ -36,7 +36,7 @@ claude-agent/
 │
 ├── tests/                     # Test suite
 │   ├── __init__.py
-│   └── test_agent_workflow.py
+│   └── test_agentic_workflow.py
 │
 ├── scripts/                   # Shell scripts (minimal)
 │   └── entrypoint.sh          # Docker entrypoint only
@@ -91,11 +91,11 @@ claude-agent/
 [2024-11-13 10:30:50] ERROR: Error fetching issue: Not Found
 ```
 
-### 4. Main Workflow (`src/agent_workflow.py`)
+### 4. Main Workflow (`src/agentic_workflow.py`)
 
 **Purpose**: Core business logic for issue resolution
 
-**Class**: `AgentWorkflow`
+**Class**: `AgenticWorkflow`
 
 **Key Methods**:
 
@@ -136,7 +136,7 @@ Environment Variables
         ↓
     AgentConfig
         ↓
-  AgentWorkflow
+  AgenticWorkflow
         ↓
     ┌───────────────┐
     │  GitHub API   │ ← Fetch issue
@@ -218,7 +218,7 @@ except SpecificException as e:
 
 ## Testing Strategy
 
-### Unit Tests (`tests/test_agent_workflow.py`)
+### Unit Tests (`tests/test_agentic_workflow.py`)
 
 **Coverage**:
 - Configuration validation
@@ -298,7 +298,7 @@ deploy:
 ### Adding New Features
 
 1. **New AI Providers**: Create provider interface
-2. **Custom Workflows**: Extend `AgentWorkflow` class
+2. **Custom Workflows**: Extend `AgenticWorkflow` class
 3. **Additional Checks**: Add methods to workflow
 4. **Notification Systems**: Add notification module
 
@@ -407,7 +407,7 @@ pytest tests/ -v
 export GITHUB_TOKEN=...
 export ANTHROPIC_API_KEY=...
 export REPO_URL=...
-python src/agent_workflow.py
+python src/agentic_workflow.py
 ```
 
 ### Building Docker Image
