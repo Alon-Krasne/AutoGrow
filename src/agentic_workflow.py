@@ -370,6 +370,15 @@ Closes #{issue['number']}
         except Exception as e:
             self.logger.error(f"\nError during workflow execution: {e}")
             import traceback
+
+# Logging
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from logging_config import get_logger
+
+logger = get_logger(__name__)
+
             traceback.print_exc()
             return 1
 

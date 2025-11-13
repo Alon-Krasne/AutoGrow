@@ -27,6 +27,15 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+
+# Backup and temporary files
+*.bak
+*.old
+*.disabled
+*.tmp
+*.swp
+*.swo
+*~
 pip-log.txt
 pip-delete-this-directory.txt
 .venv/

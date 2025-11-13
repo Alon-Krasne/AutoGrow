@@ -5,6 +5,15 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
 
+# Logging
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from logging_config import get_logger
+
+logger = get_logger(__name__)
+
+
 
 @dataclass
 class AgentConfig:

@@ -11,6 +11,13 @@ import sys
 from typing import Dict, List, Optional, Any
 from pathlib import Path
 
+# Add parent directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from logging_config import get_logger, log_performance
+
+# Initialize logger
+logger = get_logger(__name__)
+
 
 class GeminiAgent:
     """
