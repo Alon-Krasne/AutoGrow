@@ -14,7 +14,7 @@ from pathlib import Path
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from logging_config import get_logger, log_performance
-from ..utils.exceptions import (
+from utils.exceptions import (
     AgentError,
     AgentResponseError,
     JSONParseError,

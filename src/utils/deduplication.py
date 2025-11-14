@@ -259,16 +259,16 @@ class IssueDuplicateChecker:
                 )
 
                 if verbose:
-                    logger.info(f"DUPLICATE DETECTED:")
-                    logger.info(f"   New: {new_title[:60]}")
-                    logger.info(f"   Existing #{best_match.number}: {best_match.title[:60]}")
-                    logger.info(f"   Title similarity: {best_scores['title_similarity']:.2%}")
-                    logger.info(f"   Combined similarity: {best_scores['combined_similarity']:.2%}")
+                    print(f"DUPLICATE DETECTED:")
+                    print(f"   New: {new_title[:60]}")
+                    print(f"   Existing #{best_match.number}: {best_match.title[:60]}")
+                    print(f"   Title similarity: {best_scores['title_similarity']:.2%}")
+                    print(f"   Combined similarity: {best_scores['combined_similarity']:.2%}")
             else:
                 # Not a duplicate
                 non_duplicates.append(new_issue)
                 logger.debug(f"Unique issue detected: {new_title[:60]}")
                 if verbose:
-                    logger.info(f"UNIQUE: {new_title[:60]}")
+                    print(f"UNIQUE: {new_title[:60]}")
 
         return non_duplicates, duplicates_found
