@@ -23,6 +23,7 @@ from logging_config import get_logger
 from models_config import CLAUDE_MODELS, SystemPrompts
 from utils.github_helpers import get_recent_commits, create_issue, get_recent_issues, get_repo_info
 from utils.anthropic_helpers import call_anthropic_api
+from utils.retry import retry_github_api
 
 # Import exception classes
 from utils.exceptions import (
