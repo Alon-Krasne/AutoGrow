@@ -25,6 +25,3 @@ jobs:
       agent: sales
       dry_mode: ${{ inputs.dry_mode || false }}
       min_issues: ${{ inputs.min_issues || '2' }}
-    secrets:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}

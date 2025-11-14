@@ -17,11 +17,6 @@ on:
         required: false
         default: '2'
         type: string
-    secrets:
-      GITHUB_TOKEN:
-        required: true
-      ANTHROPIC_API_KEY:
-        required: true
 
 jobs:
   run-specialized-agents:
