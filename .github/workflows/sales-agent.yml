@@ -18,6 +18,11 @@ on:
         default: '2'
         type: string
 
+permissions:
+  contents: read
+  issues: write
+  pull-requests: read
+
 jobs:
   run-sales-agent:
     uses: ./.github/workflows/specialized-agents.yml
