@@ -244,13 +244,13 @@ This template uses **GitHub as the central nervous system**:
 ### Agent Implementations
 
 #### Issue Generator Agent
-- **Location**: `.github/workflows/issue-generator.yml` + `.github/scripts/issue_generator.py`
+- **Location**: `.github/workflows/issue-generator-agent.yml` + `.github/scripts/issue_generator.py`
 - **Purpose**: Analyzes project and creates GitHub issues
 - **Triggers**: Every 10 minutes via GitHub Actions
 - **Output**: 3 labeled issues per run
 
 #### Issue Resolver Agent
-- **Location**: `.github/workflows/issue-resolver.yml` + `.github/scripts/issue_resolver.py`
+- **Location**: `.github/workflows/issue-resolver-agent.yml` + `.github/scripts/issue_resolver.py`
 - **Purpose**: Solves GitHub issues and creates PRs
 - **Triggers**: Every 10 minutes via GitHub Actions
 - **Features**: AI-powered code generation, automated testing, PR creation

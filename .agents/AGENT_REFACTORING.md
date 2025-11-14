@@ -124,7 +124,7 @@ agent.check_and_generate()
 ### In GitHub Actions (Unchanged)
 
 ```yaml
-# .github/workflows/issue-generator.yml
+# .github/workflows/issue-generator-agent.yml
 - name: Run generator
   run: python .github/scripts/issue_generator.py
 ```
@@ -170,8 +170,8 @@ ai-project-template/
 │   │   ├── issue_resolver.py     ← Thin wrapper (61 lines)
 │   │   └── qa_agent.py           ← Thin wrapper (59 lines)
 │   └── workflows/
-│       ├── issue-generator.yml   ← Unchanged
-│       ├── issue-resolver.yml    ← Unchanged
+│       ├── issue-generator-agent.yml   ← Renamed
+│       ├── issue-resolver-agent.yml    ← Renamed
 │       └── qa-agent.yml          ← Unchanged
 │
 ├── src/

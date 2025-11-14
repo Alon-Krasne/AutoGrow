@@ -120,10 +120,10 @@ QA Agent                 active
 
 ```bash
 # Test issue generator
-gh workflow run issue-generator.yml
+gh workflow run issue-generator-agent.yml
 
 # Test issue resolver
-gh workflow run issue-resolver.yml
+gh workflow run issue-resolver-agent.yml
 
 # Test QA agent
 gh workflow run qa-agent.yml
@@ -207,8 +207,8 @@ vim src/claude-agent/.env
 **Fix:**
 ```bash
 # Re-enable workflows
-gh workflow enable issue-generator.yml
-gh workflow enable issue-resolver.yml
+gh workflow enable issue-generator-agent.yml
+gh workflow enable issue-resolver-agent.yml
 gh workflow enable qa-agent.yml
 ```
 
@@ -222,10 +222,10 @@ gh workflow enable qa-agent.yml
 **Fix:**
 ```bash
 # Manually trigger
-gh workflow run issue-generator.yml
+gh workflow run issue-generator-agent.yml
 
 # Check logs
-gh run list --workflow=issue-generator.yml
+gh run list --workflow=issue-generator-agent.yml
 ```
 
 ### PRs Not Being Created

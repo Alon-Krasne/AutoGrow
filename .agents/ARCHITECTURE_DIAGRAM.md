@@ -5,8 +5,8 @@
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                     GitHub Actions Workflows                     │
-│  (.github/workflows/issue-generator.yml, issue-resolver.yml,    │
-│   qa-agent.yml)                                                  │
+│  (.github/workflows/issue-generator-agent.yml,                  │
+│   issue-resolver-agent.yml, qa-agent.yml)                       │
 └───────────────────────────┬─────────────────────────────────────┘
                             │
                             │ triggers

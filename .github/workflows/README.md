@@ -4,7 +4,7 @@ Two automated agents that maintain and resolve issues using Claude AI.
 
 ## Workflows
 
-### 1. Issue Generator Agent (`issue-generator.yml`)
+### 1. Issue Generator Agent (`issue-generator-agent.yml`)
 
 **Purpose**: Ensures the repository always has at least a minimum number of open issues.
 
@@ -25,10 +25,10 @@ MIN_OPEN_ISSUES: 3  # Minimum issues to maintain
 ```bash
 # Via GitHub UI: Actions → Issue Generator Agent → Run workflow
 # Or via gh CLI:
-gh workflow run issue-generator.yml -f min_issues=5
+gh workflow run issue-generator-agent.yml -f min_issues=5
 ```
 
-### 2. Issue Resolver Agent (`issue-resolver.yml`)
+### 2. Issue Resolver Agent (`issue-resolver-agent.yml`)
 
 **Purpose**: Automatically resolves open issues by analyzing them with Claude AI and creating PRs.
 
@@ -192,8 +192,8 @@ Click on any workflow run to see detailed logs.
 Add to your README:
 
 ```markdown
-![Issue Generator](https://github.com/{owner}/{repo}/actions/workflows/issue-generator.yml/badge.svg)
-![Issue Resolver](https://github.com/{owner}/{repo}/actions/workflows/issue-resolver.yml/badge.svg)
+![Issue Generator](https://github.com/{owner}/{repo}/actions/workflows/issue-generator-agent.yml/badge.svg)
+![Issue Resolver](https://github.com/{owner}/{repo}/actions/workflows/issue-resolver-agent.yml/badge.svg)
 ```
 
 ## Troubleshooting
@@ -247,13 +247,13 @@ Add to your README:
 ### Generate 5 issues manually
 
 ```bash
-gh workflow run issue-generator.yml -f min_issues=5
+gh workflow run issue-generator-agent.yml -f min_issues=5
 ```
 
 ### Resolve specific issue
 
 ```bash
-gh workflow run issue-resolver.yml -f issue_number=123
+gh workflow run issue-resolver-agent.yml -f issue_number=123
 ```
 
 ### Disable temporarily

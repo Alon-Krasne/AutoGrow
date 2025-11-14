@@ -158,7 +158,7 @@ from agents.issue_generator import IssueGenerator
 Workflows continue to work as before:
 
 ```yaml
-# .github/workflows/issue-generator.yml
+# .github/workflows/issue-generator-agent.yml
 - name: Run generator
   run: python .github/scripts/issue_generator.py
 ```
